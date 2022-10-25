@@ -532,3 +532,20 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+demo(complexData* cData)
+{
+  cprintf(" cData->aInt %d \n",  cData->aInt );
+  cprintf(" cData->aChar %c \n",  cData->aChar );
+  cprintf(" cData->aString %s \n",  cData->aStr );
+
+  const char* data = "Recv";
+  for(int i = 0; i < 4; i++)
+    cData->aStr[i] = data[i];
+  cData->aStr[4] = '\0';
+  cData->aInt++;
+  cData->aChar = 'b';
+
+  return 0;
+}

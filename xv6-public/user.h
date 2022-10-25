@@ -23,7 +23,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-int test_sys_call(void);
+int demo(complexData*);
 
 // ulib.c
 int stat(const char*, struct stat*);

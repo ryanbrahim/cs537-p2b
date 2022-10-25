@@ -443,10 +443,3 @@ sys_pipe(void)
   return 0;
 }
 
-int
-sys_test_sys_call(void)
-{
-  cprintf("Testing custom system call!\n");
-  cprintf("Hello world!\n");
-  return 0;
-}
