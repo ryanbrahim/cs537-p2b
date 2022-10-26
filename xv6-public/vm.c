@@ -405,8 +405,6 @@ mprotect(void *addr, int len)
   if ( len < 0 )
     return -1;
 
-  cprintf("Got to mprotect with addr=%x len=%d", addr, len);
-
   // Get the current proc's
   struct proc *proc = myproc();
   pde_t* pgdir = proc->pgdir;
@@ -432,8 +430,6 @@ munprotect(void *addr, int len)
   // Error: len less than zero
   if ( len < 0 )
     return -1;
-
-  cprintf("Got to mprotect with addr=%x len=%d", addr, len);
 
   // Get the current proc's
   struct proc *proc = myproc();
