@@ -49,7 +49,7 @@ main()
   printf(2, "getpinfo returned with a rc of %d\n", rc);
 
   printf(2, "About to run settickets!\n");
-  rc = settickets(1);
+  rc = settickets(0);
   printf(2, "settickets returned a %d\n", rc);
 
   printf(2, "\nFINAL: printing pstat\n");

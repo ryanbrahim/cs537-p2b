@@ -314,6 +314,36 @@ wait(void)
   }
 }
 
+int
+run_proc(struct cpu *c, struct proc *p)
+{
+  // Switch to chosen process.  It is the process's job
+  // to release ptable.lock and then reacquire it
+  // before jumping back to us.
+  c->proc = p;
+  switchuvm(p);
+  p->state = RUNNING;
+  // cprintf("About to run: %s [pid %d]\n", c->proc->name, c->proc->pid);
+
+  // About to run a process, save the current ticks
+  acquire(&tickslock);
+  uint ticks_start = ticks;
+  release(&tickslock);
+  // Run the process!
+  swtch(&(c->scheduler), p->context);
+  switchkvm();
+  // Determine how long we were in that process
+  acquire(&tickslock);
+  p->ticks += ticks-ticks_start;
+  release(&tickslock);
+
+  // Process is done running for now.
+  // It should have changed its p->state before coming back.
+  c->proc = 0;
+  return 0;
+}
+
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -328,43 +358,73 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
+
+  int high_procs[NPROC];
+  int high_n = 0;
+  int low_procs[NPROC];
+  int low_n = 0;
   
-  for(;;){
+  for(;;)
+  {
     // Enable interrupts on this processor.
     sti();
 
-    // Loop over process table looking for process to run.
+    // Lock the process table
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
-      // cprintf("About to run: %s [pid %d]\n", c->proc->name, c->proc->pid);
-
-      // About to run a process, save the current ticks
-      acquire(&tickslock);
-      uint ticks_start = ticks;
-      release(&tickslock);
-      // Run the process!
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
-      // Determine how long we were in that process
-      acquire(&tickslock);
-      p->ticks += ticks-ticks_start;
-      release(&tickslock);
-
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
+    // Separate runnable processes by priority
+    high_n = low_n = 0;
+    for(int i = 0; i < NPROC; i++)
+    {
+      // Found a runnable process
+      if(ptable.proc[i].state == RUNNABLE)
+      {
+        // Found a high priority process
+        if ( ptable.proc[i].tickets == 1 )
+        {
+          high_procs[high_n] = i;
+          high_n++;
+        }
+        // Found a low priority process
+        if ( ptable.proc[i].tickets == 0 )
+        {
+          low_procs[high_n] = i;
+          low_n++;
+        }
+      }
     }
-    release(&ptable.lock);
 
+    // DEBUG: print low and high procs
+    // cprintf("\nHigh: ");
+    // for(int i = 0; i < high_n; i++) { cprintf("%d", high_procs[i]); }
+    // cprintf("\nLow:  ");
+    // for(int i = 0; i < low_n; i++) { cprintf("%d", low_procs[i]); }
+    // cprintf("\n");
+    // cprintf("Num high = %d     Num low  = %d\n\n", high_n, low_n);
+
+    // Run high priority processes in round-robin
+    if ( high_n > 0 )
+    {
+      for (int i = 0; i < high_n; i++)
+      {
+        int proc_index = high_procs[i];
+        p = &ptable.proc[proc_index];
+        run_proc(c, p);
+      }
+    }
+    // IFF no runnable high priority processes,
+    // then run low-priority processes in round-robin
+    else
+    {
+      for (int i = 0; i < low_n; i++)
+      {
+        int proc_index = low_procs[i];
+        p = &ptable.proc[proc_index];
+        run_proc(c, p);
+      }
+    }
+
+    release(&ptable.lock);
   }
 }
 
@@ -552,7 +612,7 @@ procdump(void)
 int
 settickets(int number)
 {
-  cprintf("Got to settickets with arg %d!\n", number);
+  // cprintf("Got to settickets with arg %d!\n", number);
   // Error checking
   if (number < 0 || 1 < number)
     return -1;
@@ -560,12 +620,12 @@ settickets(int number)
   cli();
   struct proc *cur_proc = mycpu()->proc;
   sti();
-  cprintf("Before: PID%d->tickets=%d\n", cur_proc->pid, cur_proc->tickets);
+  // cprintf("Before: PID%d->tickets=%d\n", cur_proc->pid, cur_proc->tickets);
   // Update the current process
   cur_proc->tickets = number;
-  cli();
-  cprintf("After: PID%d->tickets=%d\n", mycpu()->proc->pid, mycpu()->proc->tickets);
-  sti();
+  // cli();
+  // cprintf("After: PID%d->tickets=%d\n", mycpu()->proc->pid, mycpu()->proc->tickets);
+  // sti();
   return 0;
 }
 
@@ -595,9 +655,9 @@ void print_pstat(struct pstat *pstat)
 int
 getpinfo(struct pstat *pstat)
 {
-  cprintf("Got to getpinfo with arg %x!\n", pstat);
-  cprintf("\nBefore pstat:\n");
-  print_pstat(pstat);
+  // cprintf("Got to getpinfo with arg %x!\n", pstat);
+  // cprintf("\nBefore pstat:\n");
+  // print_pstat(pstat);
   
   // check for null pointer
   if ( pstat == 0 )
@@ -615,10 +675,10 @@ getpinfo(struct pstat *pstat)
   }
   release(&ptable.lock);
 
-  cprintf("\nAfter pstat:\n");
-  print_pstat(pstat);
+  // cprintf("\nAfter pstat:\n");
+  // print_pstat(pstat);
 
-  cprintf("Exiting getpinfo\n");
+  // cprintf("Exiting getpinfo\n");
   return 0;
 }
 
