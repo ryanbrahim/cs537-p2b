@@ -396,18 +396,19 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 int
 mprotect(void *addr, int len)
 {
+    // Get the current proc's
+  struct proc *proc = myproc();
+  pde_t* pgdir = proc->pgdir;
+
   // Error: addr should be page aligned
   if ( (int)addr % PGSIZE != 0 )
     return -1;
   // Error: addr not in address space
-
+  if ( (int)addr + (len*PGSIZE) > proc->sz )
+    return -1;
   // Error: len less than zero
   if ( len < 0 )
     return -1;
-
-  // Get the current proc's
-  struct proc *proc = myproc();
-  pde_t* pgdir = proc->pgdir;
 
   // Iterate through pte's and set to R-only
   for ( int i = (int)addr ; i < (int)addr + len*PGSIZE; i += PGSIZE )
@@ -417,23 +418,25 @@ mprotect(void *addr, int len)
   }
   lcr3(V2P(pgdir));
   return 0;
+
 }
 
 int
 munprotect(void *addr, int len)
 {
+  // Get the current proc's
+  struct proc *proc = myproc();
+  pde_t* pgdir = proc->pgdir;
+
   // Error: addr should be page aligned
   if ( (int)addr % PGSIZE != 0 )
     return -1;
   // Error: addr not in address space
-
+  if ( (int)addr + (len*PGSIZE) > proc->sz )
+    return -1;
   // Error: len less than zero
   if ( len < 0 )
     return -1;
-
-  // Get the current proc's
-  struct proc *proc = myproc();
-  pde_t* pgdir = proc->pgdir;
 
   // Iterate through pte's and set to R-only
   for ( int i = (int)addr ; i < (int)addr + len*PGSIZE; i += PGSIZE )
