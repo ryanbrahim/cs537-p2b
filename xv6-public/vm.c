@@ -396,7 +396,7 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 int
 mprotect(void *addr, int len)
 {
-    // Get the current proc's
+  // Get the current proc's pgdir
   struct proc *proc = myproc();
   pde_t* pgdir = proc->pgdir;
 
@@ -416,9 +416,9 @@ mprotect(void *addr, int len)
     pte_t *pte = walkpgdir(pgdir, (void*)i, 0);
     (*pte) &= ~PTE_W;
   }
+
   lcr3(V2P(pgdir));
   return 0;
-
 }
 
 int
@@ -444,8 +444,8 @@ munprotect(void *addr, int len)
     pte_t *pte = walkpgdir(pgdir, (void*)i, 0);
     (*pte) |= PTE_W;
   }
+
   lcr3(V2P(pgdir));
   return 0;
-
 }
 
