@@ -1,3 +1,6 @@
+#ifndef _DEFS_H_
+#define _DEFS_H_
+
 struct buf;
 struct context;
 struct file;
@@ -8,6 +11,7 @@ struct rtcdate;
 struct spinlock;
 struct sleeplock;
 struct stat;
+struct pstat;
 struct superblock;
 
 // bio.c
@@ -108,7 +112,6 @@ void            exit(void);
 int             fork(void);
 int             growproc(int);
 int             kill(int);
-int             demo(complexData*);
 struct cpu*     mycpu(void);
 struct proc*    myproc();
 void            pinit(void);
@@ -121,6 +124,10 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int             settickets(int);
+int             getpinfo(struct pstat*);
+int             demo(complexData*);
+
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -189,3 +196,5 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+#endif // _DEFS_H_

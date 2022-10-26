@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "pstat.h"
 
 struct {
   struct spinlock lock;
@@ -342,6 +343,7 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+      // cprintf("About to run: %s [pid %d]\n", c->proc->name, c->proc->pid);
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -533,9 +535,43 @@ procdump(void)
   }
 }
 
+/**
+ * Sets the number of tickets for the current process.
+*/
+int
+settickets(int number)
+{
+  cprintf("Got to settickets with arg %d!\n", number);
+  // Error checking
+  if (number < 0 || 1 < number)
+    return -1;
+  // Get the current process
+  cli();
+  struct proc *cur_proc = mycpu()->proc;
+  sti();
+  cprintf("Before: cur_proc->tickets=%d\n", cur_proc->tickets);
+  // Update the current process
+  cur_proc->tickets = number;
+  cli();
+  cprintf("After: cur_proc->tickets=%d\n", mycpu()->proc->tickets);
+  sti();
+  return 0;
+}
+
+int
+getpinfo(struct pstat *pstat)
+{
+  // check for null pointer
+  // if ( pstat == NULL || *pstat == NULL)
+  //   return -1;
+
+  return 0;
+}
+
 int
 demo(complexData* cData)
 {
+  cprintf("Got to demo!\n");
   cprintf(" cData->aInt %d \n",  cData->aInt );
   cprintf(" cData->aChar %c \n",  cData->aChar );
   cprintf(" cData->aString %s \n",  cData->aStr );

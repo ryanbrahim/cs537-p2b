@@ -1,3 +1,9 @@
+#ifndef _USER_H_
+#define _USER_H_
+
+#include "types.h"
+#include "pstat.h"
+
 struct stat;
 struct rtcdate;
 
@@ -23,6 +29,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int settickets(int);
+int getpstat(struct pstat*);
 int demo(complexData*);
 
 // ulib.c
@@ -38,3 +46,5 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+#endif // _USER_H_

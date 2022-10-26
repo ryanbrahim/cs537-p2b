@@ -13,26 +13,42 @@ int my_strlen(char* data)
   return i;
 }
 
+// int
+// main(int argc, char **argv)
+// {
+//   printf(2, "About to test demo!\n");
+//   char* data = "Sent";
+//   int size = my_strlen(data);
+//   complexData cData;
+//   cData.aInt = 10;
+//   cData.aChar = 'a';
+//   cData.aStr = (char*)malloc(size + 1);
+//   for (int i = 0; i < size ; i++)
+//   {
+//     cData.aStr[i] = data[i];
+//   }
+//   cData.aStr[size] = '\0';
+//   if( demo( &cData ) == -1)
+//       printf(2, "complexData send failed");
+  
+//   printf(2 , "cData.aInt %d \n" , cData.aInt);
+//   printf(2 , "cData.aChar %c \n" , cData.aChar);
+//   printf(2 , "cData.aString %s \n" , cData.aStr);
+  
+//   exit();
+// }
+
 int
-main(int argc, char **argv)
+main()
 {
-  char* data = "Sent";
-  int size = my_strlen(data);
-  complexData cData;
-  cData.aInt = 10;
-  cData.aChar = 'a';
-  cData.aStr = (char*)malloc(size + 1);
-  for (int i = 0; i < size ; i++)
-  {
-    cData.aStr[i] = data[i];
-  }
-  cData.aStr[size] = '\0';
-  if( demo( &cData ) == -1)
-      printf(2, "complexData send failed");
-  
-  printf(2 , "cData.aInt %d \n" , cData.aInt);
-  printf(2 , "cData.aChar %c \n" , cData.aChar);
-  printf(2 , "cData.aString %s \n" , cData.aStr);
-  
+  printf(2, "About to run settickets!\n");
+  int rc = settickets(1);
+  printf(2, "settickets returned a %d\n", rc);
+
+  // struct pstat pstat;
+  // rc = getpinfo(&pstat);
+  // printf(2, "settickets returned a %d", rc);
+
   exit();
+  return 0;
 }

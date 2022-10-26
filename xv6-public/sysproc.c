@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "pstat.h"
 
 int
 sys_fork(void)
@@ -91,8 +92,31 @@ sys_uptime(void)
 }
 
 int
+sys_settickets(void)
+{
+  cprintf("Got to sys_settickets\n");
+  int number;
+  if(argint(0, &number) < 0)
+    return -1;
+
+  cprintf("Calling settickets with arg: %d\n", number);
+  return settickets(number);
+}
+
+int
+sys_getpinfo(void)
+{
+  struct pstat *pstat;
+  if( argptr(0, (void*)&pstat, sizeof(*pstat) ) < 0) 
+    return -1;
+
+  return getpinfo(pstat);
+}
+
+int
 sys_demo(void)
 {
+  cprintf("Got to sys_demo!\n");
   complexData* cData;
   if( argptr(0, (void*)&cData, sizeof(*cData) ) < 0) 
     return -1;
