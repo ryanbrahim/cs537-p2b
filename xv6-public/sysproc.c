@@ -130,7 +130,7 @@ sys_mprotect(void)
 {
   char *addr;
   int len;
-  if(argstr(0, &addr) < 0 || argint(1, &len) < 0)
+  if(argptr(0, (void*)&addr, sizeof(*addr)) < 0 || argint(1, &len) < 0)
     return -1;
 
   return mprotect((void*)addr, len);
@@ -140,7 +140,7 @@ int sys_munprotect(void)
 {
   char *addr;
   int len;
-  if(argstr(0, &addr) < 0 || argint(1, &len) < 0)
+  if(argptr(0, (void*)&addr, sizeof(*addr)) < 0 || argint(1, &len) < 0)
     return -1;
 
   return munprotect((void*)addr, len);

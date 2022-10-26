@@ -392,3 +392,38 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
 //PAGEBREAK!
 // Blank page.
 
+
+int
+mprotect(void *addr, int len)
+{
+  // Error: addr should be page aligned
+  if ( (int)addr % PGSIZE != 0 )
+    return -1;
+  // Error: addr not in address space
+
+  // Error: len less than zero
+  if ( len < 0 )
+    return -1;
+
+  cprintf("Got to mprotect with addr=%x len=%d", addr, len);
+
+  // Get the current proc's
+  struct proc *proc = myproc();
+  pde_t* pgdir = proc->pgdir;
+
+  // Iterate through pte's and set to R-only
+  for ( int i = (int)addr ; i < (int)addr + len*PGSIZE; i += PGSIZE )
+  {
+    pte_t *pte = walkpgdir(pgdir, (void*)i, 0);
+    (*pte) &= ~PTE_W;
+  }
+  lcr3(V2P(pgdir));
+  return 0;
+}
+
+int
+munprotect(void *addr, int len)
+{
+  return -1;
+}
+

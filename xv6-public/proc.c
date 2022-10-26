@@ -701,15 +701,3 @@ demo(complexData* cData)
   return 0;
 }
 
-int
-mprotect(void *addr, int len)
-{
-  return -1;
-}
-
-int
-munprotect(void *addr, int len)
-{
-  return -1;
-}
-
