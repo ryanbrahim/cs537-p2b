@@ -41,19 +41,25 @@ int my_strlen(char* data)
 int
 main()
 {
+  void *temp = malloc(20);
+  int rc = mprotect(temp, 20);
+  printf(2, "mprotect returned %d\n", rc);
+
+  rc = munprotect(temp, 20);
+  printf(2, "munprotect returned %d\n", rc);
 
 
-  printf(2, "About to run getpinfo!\n");
-  struct pstat pstat;
-  int rc = getpinfo(&pstat);
-  printf(2, "getpinfo returned with a rc of %d\n", rc);
+  // printf(2, "About to run getpinfo!\n");
+  // struct pstat pstat;
+  // int rc = getpinfo(&pstat);
+  // printf(2, "getpinfo returned with a rc of %d\n", rc);
 
-  printf(2, "About to run settickets!\n");
-  rc = settickets(0);
-  printf(2, "settickets returned a %d\n", rc);
+  // printf(2, "About to run settickets!\n");
+  // rc = settickets(0);
+  // printf(2, "settickets returned a %d\n", rc);
 
-  printf(2, "\nFINAL: printing pstat\n");
-  getpinfo(&pstat);
+  // printf(2, "\nFINAL: printing pstat\n");
+  // getpinfo(&pstat);
 
   exit();
   return 0;

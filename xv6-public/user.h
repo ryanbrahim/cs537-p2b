@@ -32,6 +32,8 @@ int uptime(void);
 int settickets(int);
 int getpinfo(struct pstat*);
 int demo(complexData*);
+int mprotect(void *addr, int len);
+int munprotect(void *addr, int len);
 
 // ulib.c
 int stat(const char*, struct stat*);
