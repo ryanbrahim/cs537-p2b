@@ -89,6 +89,8 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->tickets = 1;
+  p->ticks = 0;
 
   release(&ptable.lock);
 
@@ -345,8 +347,17 @@ scheduler(void)
       p->state = RUNNING;
       // cprintf("About to run: %s [pid %d]\n", c->proc->name, c->proc->pid);
 
+      // About to run a process, save the current ticks
+      acquire(&tickslock);
+      uint ticks_start = ticks;
+      release(&tickslock);
+      // Run the process!
       swtch(&(c->scheduler), p->context);
       switchkvm();
+      // Determine how long we were in that process
+      acquire(&tickslock);
+      p->ticks += ticks-ticks_start;
+      release(&tickslock);
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
