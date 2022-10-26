@@ -549,22 +549,65 @@ settickets(int number)
   cli();
   struct proc *cur_proc = mycpu()->proc;
   sti();
-  cprintf("Before: cur_proc->tickets=%d\n", cur_proc->tickets);
+  cprintf("Before: PID%d->tickets=%d\n", cur_proc->pid, cur_proc->tickets);
   // Update the current process
   cur_proc->tickets = number;
   cli();
-  cprintf("After: cur_proc->tickets=%d\n", mycpu()->proc->tickets);
+  cprintf("After: PID%d->tickets=%d\n", mycpu()->proc->pid, mycpu()->proc->tickets);
   sti();
   return 0;
+}
+
+void print_pstat(struct pstat *pstat)
+{
+  cprintf("inuse:\n\t");
+  for (int i = 0; i < 64; i++)
+    cprintf("%d ", pstat->inuse[i]);
+  cprintf("\n");
+
+  cprintf("tickets:\n\t");
+  for (int i = 0; i < 64; i++)
+    cprintf("%d ", pstat->tickets[i]);
+  cprintf("\n");
+
+  cprintf("PIDs:\n\t");
+  for (int i = 0; i < 64; i++)
+    cprintf("%d ", pstat->pid[i]);
+  cprintf("\n");
+
+  cprintf("ticks:\n\t");
+  for (int i = 0; i < 64; i++)
+    cprintf("%d ", pstat->ticks[i]);
+  cprintf("\n");
 }
 
 int
 getpinfo(struct pstat *pstat)
 {
+  cprintf("Got to getpinfo with arg %x!\n", pstat);
+  cprintf("\nBefore pstat:\n");
+  print_pstat(pstat);
+  
   // check for null pointer
-  // if ( pstat == NULL || *pstat == NULL)
-  //   return -1;
+  if ( pstat == 0 )
+    return -1;
 
+  // Iterate through ptable and compile data
+  acquire(&ptable.lock);
+  for(int i = 0; i < NPROC; i++)
+  {
+    struct proc *cur_proc = &ptable.proc[i];
+    pstat->inuse[i] = (cur_proc->state != UNUSED) ? 1 : 0;
+    pstat->tickets[i] = cur_proc->tickets;
+    pstat->pid[i] = cur_proc->pid;
+    pstat->ticks[i] = cur_proc->ticks;
+  }
+  release(&ptable.lock);
+
+  cprintf("\nAfter pstat:\n");
+  print_pstat(pstat);
+
+  cprintf("Exiting getpinfo\n");
   return 0;
 }
 

@@ -30,7 +30,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int settickets(int);
-int getpstat(struct pstat*);
+int getpinfo(struct pstat*);
 int demo(complexData*);
 
 // ulib.c

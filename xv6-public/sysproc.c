@@ -106,10 +106,11 @@ sys_settickets(void)
 int
 sys_getpinfo(void)
 {
+  cprintf("Got to sys_getpinfo!\n");
   struct pstat *pstat;
   if( argptr(0, (void*)&pstat, sizeof(*pstat) ) < 0) 
     return -1;
-
+  cprintf("Calling getpinfo with arg: %x\n", pstat);
   return getpinfo(pstat);
 }
 

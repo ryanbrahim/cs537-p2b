@@ -41,13 +41,19 @@ int my_strlen(char* data)
 int
 main()
 {
+
+
+  printf(2, "About to run getpinfo!\n");
+  struct pstat pstat;
+  int rc = getpinfo(&pstat);
+  printf(2, "getpinfo returned with a rc of %d\n", rc);
+
   printf(2, "About to run settickets!\n");
-  int rc = settickets(1);
+  rc = settickets(1);
   printf(2, "settickets returned a %d\n", rc);
 
-  // struct pstat pstat;
-  // rc = getpinfo(&pstat);
-  // printf(2, "settickets returned a %d", rc);
+  printf(2, "\nFINAL: printing pstat\n");
+  getpinfo(&pstat);
 
   exit();
   return 0;
